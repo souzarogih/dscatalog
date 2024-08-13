@@ -4,15 +4,15 @@ import com.higorsouza.dscatalog.dto.CategoryDto;
 import com.higorsouza.dscatalog.model.Category;
 import com.higorsouza.dscatalog.repository.CategoryRepository;
 import com.higorsouza.dscatalog.service.exceptions.EntityNotFoundException;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Log4j2
 @Service
 public class CategoryService {
 
@@ -37,5 +37,14 @@ public class CategoryService {
         Category category = categoryRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Entity not found"));
 //        Category entity = category.orElseThrow(() -> new EntityNotFoundException("Entity not found"));
         return new CategoryDto(category);
+    }
+
+    @Transactional
+    public CategoryDto insert(CategoryDto categoryDto) {
+        log.info("chegou na service insert");
+        Category category = new Category();
+        category.setName(categoryDto.getName());
+        Category categorySaved = categoryRepository.save(category);
+        return new CategoryDto(categorySaved);
     }
 }
