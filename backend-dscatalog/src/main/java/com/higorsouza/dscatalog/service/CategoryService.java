@@ -4,10 +4,14 @@ import com.higorsouza.dscatalog.dto.CategoryDto;
 import com.higorsouza.dscatalog.model.Category;
 import com.higorsouza.dscatalog.repository.CategoryRepository;
 import com.higorsouza.dscatalog.service.exceptions.ControllerNotFoundException;
+import com.higorsouza.dscatalog.service.exceptions.DatabaseException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -57,8 +61,29 @@ public class CategoryService {
             category.setName(categoryDto.getName());
             return new CategoryDto(categoryRepository.save(category));
         } catch (EntityNotFoundException e){
+            log.error("UpdateError: {}", e.getMessage());
             log.error("Id not found {}",id);
             throw  new ControllerNotFoundException("Id not found " + id);
+        }
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public void delete(Long id) {
+        log.info("chegou na service delete");
+        if (!categoryRepository.existsById(id)) {
+            log.error("Recurso não encontrado for id {}", id);
+            throw new ControllerNotFoundException("Recurso não encontrado");
+        }
+        try {
+            categoryRepository.deleteById(id);
+        } catch (EmptyResultDataAccessException e){
+            log.error("DeleteError: {}", e.getMessage());
+            log.error("Id not found {}",id);
+            throw  new ControllerNotFoundException("Id not found for category in delete" + id);
+        } catch (DataIntegrityViolationException e){
+            log.error("DeleteError: {}", e.getMessage());
+            log.error("Id not found {}",id);
+            throw  new DatabaseException("Integrity violation");
         }
     }
 }

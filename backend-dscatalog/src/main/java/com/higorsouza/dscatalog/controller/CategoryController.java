@@ -2,8 +2,10 @@ package com.higorsouza.dscatalog.controller;
 
 import com.higorsouza.dscatalog.dto.CategoryDto;
 import com.higorsouza.dscatalog.service.CategoryService;
+import com.higorsouza.dscatalog.service.exceptions.DatabaseException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -53,5 +55,12 @@ public class CategoryController {
                 .buildAndExpand(categoryInserted.getId())
                 .toUri();
         return ResponseEntity.ok().body(categoryInserted);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        log.info("chegou na controller delete");
+        categoryService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }
