@@ -1,6 +1,6 @@
 package com.higorsouza.dscatalog.controller.exceptions;
 
-import com.higorsouza.dscatalog.service.exceptions.EntityNotFoundException;
+import com.higorsouza.dscatalog.service.exceptions.ControllerNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -14,8 +14,8 @@ import java.time.Instant;
 @ControllerAdvice
 public class ControllerExceptionHandler {
 
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<StandardError> controllerNotFound(EntityNotFoundException e, HttpServletRequest request) {
+    @ExceptionHandler(ControllerNotFoundException.class)
+    public ResponseEntity<StandardError> controllerNotFound(ControllerNotFoundException e, HttpServletRequest request) {
         StandardError err = new StandardError();
         err.setTimestamp(Instant.now());
         err.setStatus(HttpStatus.NOT_FOUND.value());
