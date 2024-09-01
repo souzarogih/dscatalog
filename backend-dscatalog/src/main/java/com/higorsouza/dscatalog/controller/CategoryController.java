@@ -2,16 +2,16 @@ package com.higorsouza.dscatalog.controller;
 
 import com.higorsouza.dscatalog.dto.CategoryDto;
 import com.higorsouza.dscatalog.service.CategoryService;
-import com.higorsouza.dscatalog.service.exceptions.DatabaseException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.List;
 
 @Log4j2
 @RestController
@@ -22,8 +22,14 @@ public class CategoryController {
     CategoryService categoryService;
 
     @GetMapping
-    public ResponseEntity<List<CategoryDto>> findAll() {
-        List<CategoryDto> list = categoryService.findAll();
+    public ResponseEntity<Page<CategoryDto>> findAll(@RequestParam(value = "page", defaultValue = "0") Integer page,
+                                                     @RequestParam(value = "linesPerPage", defaultValue = "5") Integer linesPerPage,
+                                                     @RequestParam(value = "direction", defaultValue = "ASC") String direction,
+                                                     @RequestParam(value = "orderBy", defaultValue = "name") String orderBy) {
+        PageRequest pageRequest = PageRequest.of(page, linesPerPage, Sort.Direction.valueOf(direction), orderBy);
+
+        Page<CategoryDto> list = categoryService.findAllPaged(pageRequest);
+
         return ResponseEntity.ok().body(list);
     }
 
