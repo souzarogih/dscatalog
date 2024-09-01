@@ -11,6 +11,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Table(name = "tb_category")
 public class Category {
 
     @Id
