@@ -1,10 +1,11 @@
 package com.higorsouza.dscatalog.dto;
 
 import com.higorsouza.dscatalog.model.Category;
-
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class CategoryDto {
 
     private Long id;

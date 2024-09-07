@@ -1,8 +1,10 @@
 package com.higorsouza.dscatalog.service;
 
 import com.higorsouza.dscatalog.dto.CategoryDto;
+import com.higorsouza.dscatalog.dto.ProductDto;
 import com.higorsouza.dscatalog.model.Category;
-import com.higorsouza.dscatalog.repository.CategoryRepository;
+import com.higorsouza.dscatalog.model.Product;
+import com.higorsouza.dscatalog.repository.ProductRepository;
 import com.higorsouza.dscatalog.service.exceptions.ControllerNotFoundException;
 import com.higorsouza.dscatalog.service.exceptions.DatabaseException;
 import jakarta.persistence.EntityNotFoundException;
@@ -18,15 +20,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Log4j2
 @Service
-public class CategoryService {
+public class ProductService {
 
     @Autowired
-    CategoryRepository categoryRepository;
+    ProductRepository productRepository;
 
     @Transactional(readOnly = true)
-    public Page<CategoryDto> findAllPaged(PageRequest pageRequest){
-        Page<Category> list = categoryRepository.findAll(pageRequest);
-        return list.map(x -> new CategoryDto(x));
+    public Page<ProductDto> findAllPaged(PageRequest pageRequest){
+        Page<Product> list = productRepository.findAll(pageRequest);
+        return list.map(x -> new ProductDto(x));
 
 //        List<CategoryDto> listDto = new ArrayList<>();
 //        for (Category.java cat : list){
@@ -37,28 +39,28 @@ public class CategoryService {
     }
 
     @Transactional(readOnly = true)
-    public CategoryDto findById(Long id) {
-        Category category = categoryRepository.findById(id).orElseThrow(() -> new ControllerNotFoundException("Entity not found"));
+    public ProductDto findById(Long id) {
+        Product product = productRepository.findById(id).orElseThrow(() -> new ControllerNotFoundException("Entity not found"));
 //        Category.java entity = category.orElseThrow(() -> new EntityNotFoundException("Entity not found"));
-        return new CategoryDto(category);
+        return new ProductDto(product, product.getCategories());
     }
 
     @Transactional
-    public CategoryDto insert(CategoryDto categoryDto) {
+    public ProductDto insert(ProductDto categoryDto) {
         log.info("chegou na service insert");
-        Category category = new Category();
-        category.setName(categoryDto.getName());
-        Category categorySaved = categoryRepository.save(category);
-        return new CategoryDto(categorySaved);
+        Product product = new Product();
+        product.setName(categoryDto.getName());
+        Product productSaved = productRepository.save(product);
+        return new ProductDto(productSaved);
     }
 
     @Transactional
-    public CategoryDto update(Long id, CategoryDto categoryDto) {
+    public ProductDto update(Long id, ProductDto categoryDto) {
         log.info("chegou na service update");
         try {
-            Category category = categoryRepository.getReferenceById(id);
-            category.setName(categoryDto.getName());
-            return new CategoryDto(categoryRepository.save(category));
+            Product product = productRepository.getReferenceById(id);
+            product.setName(categoryDto.getName());
+            return new ProductDto(productRepository.save(product));
         } catch (EntityNotFoundException e){
             log.error("UpdateError: {}", e.getMessage());
             log.error("Id not found {}",id);
@@ -69,12 +71,12 @@ public class CategoryService {
     @Transactional(propagation = Propagation.SUPPORTS)
     public void delete(Long id) {
         log.info("chegou na service delete");
-        if (!categoryRepository.existsById(id)) {
+        if (!productRepository.existsById(id)) {
             log.error("Recurso não encontrado for id {}", id);
             throw new ControllerNotFoundException("Recurso não encontrado");
         }
         try {
-            categoryRepository.deleteById(id);
+            productRepository.deleteById(id);
         } catch (EmptyResultDataAccessException e){
             log.error("DeleteError: {}", e.getMessage());
             log.error("Id not found {}",id);
