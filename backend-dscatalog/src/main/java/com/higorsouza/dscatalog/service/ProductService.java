@@ -4,6 +4,7 @@ import com.higorsouza.dscatalog.dto.CategoryDto;
 import com.higorsouza.dscatalog.dto.ProductDto;
 import com.higorsouza.dscatalog.model.Category;
 import com.higorsouza.dscatalog.model.Product;
+import com.higorsouza.dscatalog.repository.CategoryRepository;
 import com.higorsouza.dscatalog.repository.ProductRepository;
 import com.higorsouza.dscatalog.service.exceptions.ControllerNotFoundException;
 import com.higorsouza.dscatalog.service.exceptions.DatabaseException;
@@ -24,6 +25,9 @@ public class ProductService {
 
     @Autowired
     ProductRepository productRepository;
+
+    @Autowired
+    CategoryRepository categoryRepository;
 
     @Transactional(readOnly = true)
     public Page<ProductDto> findAllPaged(PageRequest pageRequest){
@@ -46,25 +50,40 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductDto insert(ProductDto categoryDto) {
+    public ProductDto insert(ProductDto productDto) {
         log.info("chegou na service insert");
         Product product = new Product();
-        product.setName(categoryDto.getName());
+        copyDtoToEntity(productDto, product);
         Product productSaved = productRepository.save(product);
         return new ProductDto(productSaved);
     }
 
     @Transactional
-    public ProductDto update(Long id, ProductDto categoryDto) {
+    public ProductDto update(Long id, ProductDto productDto) {
         log.info("chegou na service update");
         try {
             Product product = productRepository.getReferenceById(id);
-            product.setName(categoryDto.getName());
+            copyDtoToEntity(productDto, product);
+            product.setName(productDto.getName());
             return new ProductDto(productRepository.save(product));
         } catch (EntityNotFoundException e){
             log.error("UpdateError: {}", e.getMessage());
             log.error("Id not found {}",id);
             throw  new ControllerNotFoundException("Id not found " + id);
+        }
+    }
+
+    private void copyDtoToEntity(ProductDto productDto, Product product){
+        product.setName(productDto.getName());
+        product.setDescription(productDto.getDescription());
+        product.setDate(productDto.getDate());
+        product.setImgUrl(productDto.getImgUrl());
+        product.setPrice(productDto.getPrice());
+
+        product.getCategories().clear();
+        for (CategoryDto catDto : productDto.getCategories()){
+            Category category = categoryRepository.getReferenceById(catDto.getId());
+            product.getCategories().add(category);
         }
     }
 
